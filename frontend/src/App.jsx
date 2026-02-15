@@ -4,65 +4,78 @@ import { ethers } from "ethers";
 function App() {
   const [account, setAccount] = useState("");
   const [network, setNetwork] = useState("");
+  const [balance, setBalance] = useState("");
 
-
-const connectWallet = async () => {
-  if (!window.ethereum) {
-    alert("Please install MetaMask");
-    return;
-  }
-
-  try {
-    const provider = new ethers.BrowserProvider(window.ethereum);
-
-    const accounts = await provider.send("eth_requestAccounts", []);
-    const chainId = await window.ethereum.request({ method: "eth_chainId" });
-
-    setAccount(accounts[0]);
-
-    if (chainId === "0xaa36a7") {
-      setNetwork("sepolia");
-    } else if (chainId === "0x1") {
-      setNetwork("mainnet");
-    } else {
-      setNetwork("unknown");
+  const connectWallet = async () => {
+    if (!window.ethereum) {
+      alert("Please install MetaMask");
+      return;
     }
 
-  } catch (error) {
-    console.log(error);
-  }
-};
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0xaa36a7" }],
+      });
 
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const accounts = await provider.send("eth_requestAccounts", []);
+      const net = await provider.getNetwork();
+
+      setAccount(accounts[0]);
+
+      const bal = await provider.getBalance(accounts[0]);
+      setBalance(Number(ethers.formatEther(bal)).toFixed(4));
+
+      if (net.chainId === 11155111n) {
+        setNetwork("sepolia");
+      } else {
+        setNetwork("mainnet");
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
-    <div style={{ padding: "40px", textAlign: "center" }}>
-      <h1>AnyWallet</h1>
-      <h2>Wallet Risk Analyzer</h2>
+    <div className="page">
 
-      <button
-        onClick={connectWallet}
-        style={{
-          padding: "10px 20px",
-          fontSize: "16px",
-          cursor: "pointer",
-          marginTop: "20px"
-        }}
-      >
-        Connect Wallet
-      </button>
+     <div className="floating-cube cube1">
+  <div className="cube-face front"></div>
+  <div className="cube-face back"></div>
+  <div className="cube-face right"></div>
+  <div className="cube-face left"></div>
+  <div className="cube-face top"></div>
+  <div className="cube-face bottom"></div>
+</div>
 
-      {account && (
-        <p style={{ marginTop: "20px" }}>
-         Connected Account: {account.slice(0,6)}...{account.slice(-4)}
+<div className="floating-cube cube2">
+  <div className="cube-face front"></div>
+  <div className="cube-face back"></div>
+  <div className="cube-face right"></div>
+  <div className="cube-face left"></div>
+  <div className="cube-face top"></div>
+  <div className="cube-face bottom"></div>
+</div>
 
-        </p>
-      )}
-      {network && (
-  <p style={{ marginTop: "10px" }}>
-    Network: {network}
-  </p>
-)}
 
+      <div className="card">
+        <h1>AnyWallet</h1>
+        <p className="subtitle">Cyber Wallet Risk Analyzer</p>
+
+        <button onClick={connectWallet}>
+          Connect Wallet
+        </button>
+
+        {account && (
+          <>
+            <p>{account.slice(0,6)}...{account.slice(-4)}</p>
+            <p>Network: {network}</p>
+            <p>Balance: {balance} ETH</p>
+          </>
+        )}
+      </div>
     </div>
   );
 }
