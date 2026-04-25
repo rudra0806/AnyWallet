@@ -66,7 +66,8 @@ Real-world project structure
 Debugging deployment issues
 
 
-🙌 Author
+🙌 Author:
+
 Rudra Vaishnav
 
 
