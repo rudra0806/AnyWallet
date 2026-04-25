@@ -1,5 +1,6 @@
-📦 AnyWallet – Web3 Wallet App
-A full-stack Web3 application that allows users to connect their crypto wallet and interact with a backend service.
+📦 AnyWallet 
+
+A Web3 application that analyzes the risk associated with a user's crypto transactions by leveraging wallet connectivity through MetaMask.
 
 🚀 Live Demo
 
