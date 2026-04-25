@@ -142,11 +142,11 @@ const walletRiskScore = Math.min(adjustedRisk, 100);
     const fetchTransactions = async (walletAddress, page = 1) => {
       try {
         setLoading(true); 
-    const API_KEY = import.meta.env.VITE_ETHERSCAN_API_KEY;
+        console.log("Fetching from backend:", walletAddress);
 
-    const url = `https://api.etherscan.io/v2/api?chainid=11155111&module=account&action=txlist&address=${walletAddress}&page=${page}&offset=20&sort=desc&apikey=${API_KEY}`;
+    
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/transactions/${walletAddress}`)
 
-    const response = await fetch(url);
     const data = await response.json();
 
       if (data.status === "1") {
@@ -164,11 +164,11 @@ const walletRiskScore = Math.min(adjustedRisk, 100);
   }
 };
 
-useEffect(() => {
-      if (activeTab === "history" && account) {
-        fetchTransactions(account, currentPage);
-      }
-    }, [activeTab, currentPage, account]);
+// useEffect(() => {
+//       if (activeTab === "history" && account) {
+//         fetchTransactions(account, currentPage);
+//       }
+//     }, [activeTab, currentPage, account]);
 
 useEffect(() => {
   const checkConnection = async () => {
@@ -200,7 +200,7 @@ useEffect(() => {
 
         const bal = await provider.getBalance(account);
         setBalance(Number(ethers.formatEther(bal)).toFixed(4));
-        fetchTransactions(account, currentPage);
+        //fetchTransactions(account, currentPage);
       }
 
     } catch (err) {
@@ -212,20 +212,29 @@ useEffect(() => {
 }, []);
 
 
+
  const connectWallet = async () => {
-  if (!window.ethereum) {
-    alert("MetaMask not detected");
-    return;
-  }
+console.log("Ethereum object:", window.ethereum);
+
+if (typeof window.ethereum === "undefined") {
+  alert("MetaMask not detected");
+  return;
+}
+
+if (!window.ethereum.isMetaMask) {
+  alert("MetaMask not detected properly");
+  return;
+}
 
   try {
+    console.log("Requesting accounts...");
     const accounts = await window.ethereum.request({
       method: "eth_requestAccounts",
     });
 
     const account = accounts[0];
     setAccount(account);
-    fetchTransactions(account);
+    await fetchTransactions(account);
     setPage("dashboard");
 
     const provider = new ethers.BrowserProvider(window.ethereum);
